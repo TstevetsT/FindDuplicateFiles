@@ -1,0 +1,34 @@
+#!/bin/bash
+# Checks for files with same name and md5 hash and returns a list of the files with path
+{
+if [ -f ./duplicatefiles ]; then
+echo "duplicatefiles exists, erase and run again!"
+exit 0
+fi
+}
+echo "Making File List"
+find . -type f > files352e4t
+echo "Finding Duplicate Files (by Name)"
+cat files352e4t |rev |cut -d "/" -f1 |rev |sort |uniq -d > dupfiles352e4t
+while read line;
+do 
+	echo Searching Files for "$line" and building list to run md5
+    cat files352e4t |grep "$line" >> md5these352e4t
+done < dupfiles352e4t
+cat md5these352e4t |grep -v /.DS.Store > md5theseto352e4t
+while read line;
+do
+	echo md5 of "$line" in progress
+    md5 "$line" >> md5s352e4t
+done<md5theseto352e4t
+echo "Finding Duplicate MD5s"
+cat md5s352e4t |uniq -f 3 -d |cut -d " " -f 5 >> duplicates352e4t
+while read line;
+do
+    echo finding "$line" in md5 list
+    cat md5s352e4t |grep "$line" |cut -d "(" -f2 |cut -d ")" -f1 >> duplicatefiles
+done <duplicates352e4t
+echo "Duplicate Files! (saved in duplicatefiles)"
+echo "cleaning up!"
+rm files352e4t dupfiles352e4t md5these352e4t md5theseto352e4t duplicates352e4t md5s352e4t
+cat duplicatefiles
